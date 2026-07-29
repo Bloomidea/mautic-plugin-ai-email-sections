@@ -37,3 +37,10 @@
   margin-top: -4px;
   margin-bottom: 8px;
 }
+
+/* A roomier right panel. GrapesJS defaults the views container to 15% of the
+ * viewport, which leaves the prompt textarea cramped on common screens. The
+ * canvas has to give up the same width or it renders underneath the panel. */
+.gjs-pn-views-container,
+.gjs-pn-views { width: 300px; }
+.gjs-cv-canvas { width: calc(100% - 300px); }
