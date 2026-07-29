@@ -2,6 +2,8 @@
 
 Generates MJML sections in Mautic's email builder from a plain text description, and edits sections that already exist.
 
+![Describing a section and generating it in place in the Mautic email builder](docs/demo.gif)
+
 It does not generate whole emails and it does not replace the theme. The theme still owns the brand and the skeleton; this fills one section at a time.
 
 ## Requirements
