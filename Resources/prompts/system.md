@@ -59,7 +59,7 @@ Respect these values. Do not invent colours or typefaces outside this list.
 
 # Quality
 
-- Write the copy in the same language as the request. If the request is written in Portuguese, the copy is in Portuguese; if it is in German, the copy is in German. The language of these instructions and of the examples is irrelevant to that choice.
+- Write the copy in the exact language the request itself is written in, whatever that language is. The language of these instructions and of the examples says nothing about it.
 - Short, concrete copy. Never "Lorem ipsum", and never generic filler such as "Product Title" or "Product description here".
 - Use `padding` for breathing room rather than reaching for `<mj-spacer>` all the time.
 
