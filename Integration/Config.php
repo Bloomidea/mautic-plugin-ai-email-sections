@@ -44,7 +44,7 @@ class Config
     public const DEFAULT_ANTHROPIC_MODEL    = 'claude-sonnet-5';
     public const DEFAULT_TEMPERATURE        = 0.4;
     public const DEFAULT_MAX_TOKENS         = 1500;
-    public const DEFAULT_PLACEHOLDER        = 'https://placehold.co/600x400/eeeeee/999999.png?text=Imagem';
+    public const DEFAULT_PLACEHOLDER        = 'https://placehold.co/600x400/eeeeee/999999.png?text=Image';
     public const DEFAULT_RATE_LIMIT         = 30;
     public const DEFAULT_THEME              = 'default';
     /**

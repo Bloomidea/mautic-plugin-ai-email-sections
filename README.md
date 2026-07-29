@@ -1,4 +1,4 @@
-# AI Email Sections
+# Mautic AI Email Sections
 
 Generates MJML sections in Mautic's email builder from a plain text description, and edits sections that already exist.
 
