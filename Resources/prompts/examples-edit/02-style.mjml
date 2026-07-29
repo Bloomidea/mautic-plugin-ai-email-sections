@@ -1,0 +1,15 @@
+<!-- prompt: change the button to brown -->
+<!-- source -->
+<mj-section background-color="#ffffff" padding="24px 24px">
+  <mj-column>
+    <mj-text font-family="Helvetica, Arial, sans-serif" font-size="15px" color="#333333"><p>Hi {contactfield=firstname}, the new collection is here.</p></mj-text>
+    <mj-button href="https://example.com/shop" background-color="#2b6cb0" color="#ffffff" border-radius="4px" padding="12px 24px">See the collection</mj-button>
+  </mj-column>
+</mj-section>
+<!-- result -->
+<mj-section background-color="#ffffff" padding="24px 24px">
+  <mj-column>
+    <mj-text font-family="Helvetica, Arial, sans-serif" font-size="15px" color="#333333"><p>Hi {contactfield=firstname}, the new collection is here.</p></mj-text>
+    <mj-button href="https://example.com/shop" background-color="#6b4423" color="#ffffff" border-radius="4px" padding="12px 24px">See the collection</mj-button>
+  </mj-column>
+</mj-section>

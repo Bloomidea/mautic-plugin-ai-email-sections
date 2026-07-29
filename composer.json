@@ -1,0 +1,28 @@
+{
+    "name": "bloomidea/mautic-plugin-ai-email-sections",
+    "description": "Generates MJML sections in the GrapesJS email builder from a text description, with allowlist validation and preservation invariants.",
+    "type": "mautic-plugin",
+    "license": "GPL-3.0-or-later",
+    "keywords": [
+        "mautic",
+        "plugin",
+        "grapesjs",
+        "mjml",
+        "email",
+        "ai"
+    ],
+    "authors": [
+        {
+            "name": "Bloomidea",
+            "homepage": "https://bloomidea.com"
+        }
+    ],
+    "extra": {
+        "install-directory-name": "AiEmailSectionsBundle"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "mautic/core-lib": "^7.0"
+    }
+}

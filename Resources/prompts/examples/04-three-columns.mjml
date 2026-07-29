@@ -1,0 +1,15 @@
+<!-- prompt: three columns, each with an icon and one sentence -->
+<mj-section background-color="#ffffff" padding="24px 24px">
+  <mj-column>
+    <mj-image src="{{PLACEHOLDER_IMAGE}}" alt="" width="48px" padding="0px 0px 8px 0px"></mj-image>
+    <mj-text align="center" font-family="Helvetica, Arial, sans-serif" font-size="13px" color="#333333"><p>Free delivery over 100 &#8364;</p></mj-text>
+  </mj-column>
+  <mj-column>
+    <mj-image src="{{PLACEHOLDER_IMAGE}}" alt="" width="48px" padding="0px 0px 8px 0px"></mj-image>
+    <mj-text align="center" font-family="Helvetica, Arial, sans-serif" font-size="13px" color="#333333"><p>Returns within 30 days</p></mj-text>
+  </mj-column>
+  <mj-column>
+    <mj-image src="{{PLACEHOLDER_IMAGE}}" alt="" width="48px" padding="0px 0px 8px 0px"></mj-image>
+    <mj-text align="center" font-family="Helvetica, Arial, sans-serif" font-size="13px" color="#333333"><p>Packed by hand</p></mj-text>
+  </mj-column>
+</mj-section>

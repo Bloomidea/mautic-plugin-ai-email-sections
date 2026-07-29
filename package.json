@@ -1,0 +1,21 @@
+{
+  "name": "ai-email-sections",
+  "version": "0.1.0",
+  "description": "AI Email Sections plugin for Mautic's MJML email builder.",
+  "license": "GPL-3.0-or-later",
+  "private": true,
+  "scripts": {
+    "test": "jest",
+    "build": "cp Assets/src/index.js Assets/dist/index.js"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testMatch": [
+      "<rootDir>/Tests/Js/**/*.test.js"
+    ]
+  }
+}

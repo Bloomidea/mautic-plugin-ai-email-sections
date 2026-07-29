@@ -1,0 +1,19 @@
+<!-- prompt: cut the copy in half -->
+<!-- source -->
+<mj-section background-color="#ffffff" padding="24px 24px">
+  <mj-column>
+    <mj-text font-family="Helvetica, Arial, sans-serif" font-size="15px" color="#333333">
+      <p>We started earlier this year, so your order arrives without any last minute panic or unpleasant surprises.</p>
+      <p>Every order is packed by hand and takes the time it takes. Order by 15 December to be sure it arrives before the holidays.</p>
+    </mj-text>
+  </mj-column>
+</mj-section>
+<!-- result -->
+<mj-section background-color="#ffffff" padding="24px 24px">
+  <mj-column>
+    <mj-text font-family="Helvetica, Arial, sans-serif" font-size="15px" color="#333333">
+      <p>We started earlier this year, so your order arrives without the rush.</p>
+      <p>Order by 15 December to receive it before the holidays.</p>
+    </mj-text>
+  </mj-column>
+</mj-section>

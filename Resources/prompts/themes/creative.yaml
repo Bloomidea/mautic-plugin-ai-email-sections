@@ -1,0 +1,38 @@
+# Creative. Sampled from themes/creative/html/email.html.twig, which is the
+# theme Mautic ships. Colours, fonts and sizes are the values that theme
+# actually uses; line_height is a neutral fill-in.
+name: Creative
+
+body:
+  width: 600px
+  background_color: "#f5f5f5"
+  section_background_color: "#ffffff"
+
+palette:
+  text: "#000000"
+  heading: "#000000"
+  muted: "#a1a1a1"
+  accent: "#1473e6"
+  button_background: "#1473e6"
+  button_text: "#ffffff"
+  divider: "#fafafa"
+
+typography:
+  font_family: "Ubuntu, Helvetica, Arial, sans-serif"
+  heading_size: 24px
+  subheading_size: 18px
+  body_size: 16px
+  small_size: 11px
+  line_height: 1.5
+
+spacing:
+  section_padding: 20px 24px
+  column_padding: 0px
+  button_padding: 12px 24px
+
+button:
+  border_radius: 24px
+
+conventions:
+  - Buttons are strongly rounded.
+  - Sections alternate between white and a near-white grey.

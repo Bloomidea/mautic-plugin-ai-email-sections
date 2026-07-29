@@ -1,0 +1,38 @@
+# Attract. Sampled from themes/attract/html/email.html.twig, which is the
+# theme Mautic ships. Colours, fonts and sizes are the values that theme
+# actually uses; line_height is a neutral fill-in, the theme sets it per element.
+name: Attract
+
+body:
+  width: 600px
+  background_color: "#f4f4f4"
+  section_background_color: "#ffffff"
+
+palette:
+  text: "#000000"
+  heading: "#000000"
+  muted: "#6f6f6f"
+  accent: "#004080"
+  button_background: "#004080"
+  button_text: "#ffffff"
+  divider: "#e2e2e2"
+
+typography:
+  font_family: "Ubuntu, Helvetica, Arial, sans-serif"
+  heading_size: 24px
+  subheading_size: 18px
+  body_size: 14px
+  small_size: 12px
+  line_height: 1.5
+
+spacing:
+  section_padding: 20px 24px
+  column_padding: 0px
+  button_padding: 12px 24px
+
+button:
+  border_radius: 50px
+
+conventions:
+  - Buttons are fully rounded pills.
+  - Dark blue is the only accent; the rest is black on white.

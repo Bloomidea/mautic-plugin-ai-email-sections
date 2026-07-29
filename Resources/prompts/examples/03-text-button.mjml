@@ -1,0 +1,13 @@
+<!-- prompt: text block about the Christmas campaign, two paragraphs and a button -->
+<mj-section background-color="#ffffff" padding="24px 24px">
+  <mj-column>
+    <mj-text font-family="Helvetica, Arial, sans-serif" font-size="15px" color="#333333" line-height="1.5">
+      <h2>Christmas, without the rush</h2>
+      <p>We started earlier this year, so your order arrives without any last minute panic. The Christmas range is already in the shop.</p>
+      <p>Every order is packed by hand and takes the time it takes. Order by 15 December to be sure it arrives before the holidays.</p>
+    </mj-text>
+    <mj-button href="https://example.com/christmas" background-color="#2b6cb0" color="#ffffff" border-radius="4px" padding="12px 24px" font-family="Helvetica, Arial, sans-serif">
+      See the Christmas range
+    </mj-button>
+  </mj-column>
+</mj-section>

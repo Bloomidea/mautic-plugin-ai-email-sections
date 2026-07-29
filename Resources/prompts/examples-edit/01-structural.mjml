@@ -1,0 +1,17 @@
+<!-- prompt: put this in two columns -->
+<!-- source -->
+<mj-section background-color="#ffffff" padding="24px 24px">
+  <mj-column>
+    <mj-text font-family="Helvetica, Arial, sans-serif" font-size="15px" color="#333333"><p>Packed by hand, with materials we can trace.</p></mj-text>
+    <mj-text font-family="Helvetica, Arial, sans-serif" font-size="15px" color="#333333"><p>Every order takes eighteen hours of work.</p></mj-text>
+  </mj-column>
+</mj-section>
+<!-- result -->
+<mj-section background-color="#ffffff" padding="24px 24px">
+  <mj-column>
+    <mj-text font-family="Helvetica, Arial, sans-serif" font-size="15px" color="#333333"><p>Packed by hand, with materials we can trace.</p></mj-text>
+  </mj-column>
+  <mj-column>
+    <mj-text font-family="Helvetica, Arial, sans-serif" font-size="15px" color="#333333"><p>Every order takes eighteen hours of work.</p></mj-text>
+  </mj-column>
+</mj-section>

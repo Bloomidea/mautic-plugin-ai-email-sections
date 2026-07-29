@@ -1,0 +1,37 @@
+# Blank. Sampled from themes/blank/html/email.html.twig, which is the
+# theme Mautic ships. Colours, fonts and sizes are the values that theme
+# actually uses; the theme declares no accent and no button, so those are neutral.
+name: Blank
+
+body:
+  width: 600px
+  background_color: "#ffffff"
+  section_background_color: "#ffffff"
+
+palette:
+  text: "#000000"
+  heading: "#000000"
+  muted: "#6d6d6d"
+  accent: "#000000"
+  button_background: "#000000"
+  button_text: "#ffffff"
+  divider: "#e5e5e5"
+
+typography:
+  font_family: "'Open Sans', Helvetica, Arial, sans-serif"
+  heading_size: 28px
+  subheading_size: 20px
+  body_size: 14px
+  small_size: 11px
+  line_height: 1.5
+
+spacing:
+  section_padding: 20px 24px
+  column_padding: 0px
+  button_padding: 12px 24px
+
+button:
+  border_radius: 3px
+
+conventions:
+  - Deliberately plain. Add no colour that the request did not ask for.

@@ -1,0 +1,11 @@
+<!-- prompt: hero with a full-width image and a headline over it -->
+<mj-section background-url="{{PLACEHOLDER_IMAGE}}" background-size="cover" background-repeat="no-repeat" padding="64px 24px">
+  <mj-column>
+    <mj-text align="center" font-family="Helvetica, Arial, sans-serif" font-size="24px" color="#ffffff">
+      <h1>The new collection is here</h1>
+    </mj-text>
+    <mj-text align="center" font-family="Helvetica, Arial, sans-serif" font-size="15px" color="#ffffff">
+      <p>Made to last, and now available online.</p>
+    </mj-text>
+  </mj-column>
+</mj-section>

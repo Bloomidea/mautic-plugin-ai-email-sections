@@ -1,0 +1,24 @@
+<!-- prompt: two asymmetric columns, image on the left, title and two buttons side by side on the right -->
+<mj-section background-color="#ffffff" padding="24px 24px">
+  <mj-column width="40%">
+    <mj-image src="{{PLACEHOLDER_IMAGE}}" alt="Product" padding="0px"></mj-image>
+  </mj-column>
+  <mj-column width="60%">
+    <mj-text font-family="Helvetica, Arial, sans-serif" font-size="15px" color="#333333" line-height="1.5">
+      <h2>Enamel Mug, 350 ml</h2>
+      <p>Steel core with a chipped-edge finish, made for the camp stove and the office alike.</p>
+    </mj-text>
+    <mj-group>
+      <mj-column>
+        <mj-button href="https://example.com/buy" background-color="#2b6cb0" color="#ffffff" border-radius="4px" padding="12px 8px" font-family="Helvetica, Arial, sans-serif">
+          Buy now
+        </mj-button>
+      </mj-column>
+      <mj-column>
+        <mj-button href="https://example.com/details" background-color="#ffffff" color="#2b6cb0" border="1px solid #2b6cb0" border-radius="4px" padding="12px 8px" font-family="Helvetica, Arial, sans-serif">
+          See details
+        </mj-button>
+      </mj-column>
+    </mj-group>
+  </mj-column>
+</mj-section>

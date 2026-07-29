@@ -1,0 +1,39 @@
+/* AI Email Sections */
+.gjs-assistant { padding: 8px 4px; }
+.gjs-assistant__target { font-size: 11px; opacity: .7; margin-bottom: 6px; }
+.gjs-assistant__prompt { width: 100%; box-sizing: border-box; resize: vertical; font-size: 12px;
+  padding: 6px; border-radius: 3px; border: 1px solid rgba(0,0,0,.2); background: rgba(0,0,0,.15); color: inherit; }
+.gjs-assistant__run { margin-top: 6px; width: 100%; padding: 6px 10px; cursor: pointer;
+  border: 0; border-radius: 3px; background: #d278c9; color: #fff; font-size: 12px; }
+.gjs-assistant__run[disabled] { opacity: .5; cursor: not-allowed; }
+.gjs-assistant__status { margin-top: 6px; font-size: 11px; line-height: 1.4; min-height: 14px; }
+.gjs-assistant__status.is-error { color: #e57373; }
+.gjs-assistant__status.is-loading { opacity: .7; }
+.gjs-assistant--loading { opacity: .5; }
+.gjs-assistant__hint { margin-top: 4px; font-size: 10px; opacity: .6; line-height: 1.3; }
+
+.gjs-assistant__theme {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 4px;
+  font-size: 12px;
+  color: inherit;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.gjs-assistant__label {
+  /* Top margin because in create mode the language note sits directly above. */
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  opacity: .75;
+}
+
+.gjs-assistant__theme + .gjs-assistant__hint {
+  margin-top: -4px;
+  margin-bottom: 8px;
+}

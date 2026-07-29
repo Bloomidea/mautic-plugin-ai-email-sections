@@ -1,0 +1,38 @@
+# Brienz. Sampled from themes/brienz/html/email.html.twig, which is the
+# theme Mautic ships. Colours, fonts and sizes are the values that theme
+# actually uses; line_height is a neutral fill-in.
+name: Brienz
+
+body:
+  width: 600px
+  background_color: "#d6dde5"
+  section_background_color: "#ffffff"
+
+palette:
+  text: "#000000"
+  heading: "#000000"
+  muted: "#6d6d6d"
+  accent: "#486ae2"
+  button_background: "#9e094e"
+  button_text: "#ffffff"
+  divider: "#d6dde5"
+
+typography:
+  font_family: "Ubuntu, Helvetica, Arial, sans-serif"
+  heading_size: 24px
+  subheading_size: 20px
+  body_size: 16px
+  small_size: 11px
+  line_height: 1.5
+
+spacing:
+  section_padding: 20px 24px
+  column_padding: 0px
+  button_padding: 12px 24px
+
+button:
+  border_radius: 3px
+
+conventions:
+  - The button colour is deliberately not the accent colour: blue leads, magenta calls to action.
+  - Some sections invert to a blue background with white text.

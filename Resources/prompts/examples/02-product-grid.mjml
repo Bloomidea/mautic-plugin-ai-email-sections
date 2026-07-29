@@ -1,0 +1,25 @@
+<!-- prompt: grid of 4 products, 2 per row, with image, name and price -->
+<mj-section background-color="#ffffff" padding="24px 24px">
+  <mj-column>
+    <mj-image src="{{PLACEHOLDER_IMAGE}}" alt="Product" padding="0px"></mj-image>
+    <mj-text align="center" font-family="Helvetica, Arial, sans-serif" font-size="15px" color="#111111"><p>Canvas Weekend Bag</p></mj-text>
+    <mj-text align="center" font-family="Helvetica, Arial, sans-serif" font-size="13px" color="#777777"><p>180 &#8364;</p></mj-text>
+  </mj-column>
+  <mj-column>
+    <mj-image src="{{PLACEHOLDER_IMAGE}}" alt="Product" padding="0px"></mj-image>
+    <mj-text align="center" font-family="Helvetica, Arial, sans-serif" font-size="15px" color="#111111"><p>Leather Card Holder</p></mj-text>
+    <mj-text align="center" font-family="Helvetica, Arial, sans-serif" font-size="13px" color="#777777"><p>45 &#8364;</p></mj-text>
+  </mj-column>
+</mj-section>
+<mj-section background-color="#ffffff" padding="0px 24px 24px 24px">
+  <mj-column>
+    <mj-image src="{{PLACEHOLDER_IMAGE}}" alt="Product" padding="0px"></mj-image>
+    <mj-text align="center" font-family="Helvetica, Arial, sans-serif" font-size="15px" color="#111111"><p>Wool Scarf</p></mj-text>
+    <mj-text align="center" font-family="Helvetica, Arial, sans-serif" font-size="13px" color="#777777"><p>60 &#8364;</p></mj-text>
+  </mj-column>
+  <mj-column>
+    <mj-image src="{{PLACEHOLDER_IMAGE}}" alt="Product" padding="0px"></mj-image>
+    <mj-text align="center" font-family="Helvetica, Arial, sans-serif" font-size="15px" color="#111111"><p>Enamel Mug</p></mj-text>
+    <mj-text align="center" font-family="Helvetica, Arial, sans-serif" font-size="13px" color="#777777"><p>22 &#8364;</p></mj-text>
+  </mj-column>
+</mj-section>

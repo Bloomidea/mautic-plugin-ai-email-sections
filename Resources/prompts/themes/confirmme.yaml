@@ -1,0 +1,38 @@
+# ConfirmMe. Sampled from themes/confirmme/html/email.html.twig, which is the
+# theme Mautic ships. Colours, fonts and sizes are the values that theme
+# actually uses; small_size and the button radius are neutral fill-ins.
+name: ConfirmMe
+
+body:
+  width: 600px
+  background_color: "#f0f0f0"
+  section_background_color: "#fafafa"
+
+palette:
+  text: "#6f6f6f"
+  heading: "#6f6f6f"
+  muted: "#6f6f6f"
+  accent: "#f45e43"
+  button_background: "#f45e43"
+  button_text: "#ffffff"
+  divider: "#f0f0f0"
+
+typography:
+  font_family: "Open Sans, Arial, Helvetica, sans-serif"
+  heading_size: 24px
+  subheading_size: 20px
+  body_size: 15px
+  small_size: 12px
+  line_height: 1.5
+
+spacing:
+  section_padding: 20px 24px
+  column_padding: 0px
+  button_padding: 12px 24px
+
+button:
+  border_radius: 3px
+
+conventions:
+  - Warm coral is the only accent, on a soft grey page.
+  - Body text is grey rather than black.

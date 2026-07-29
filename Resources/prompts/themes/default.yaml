@@ -1,0 +1,33 @@
+# Generic theme tokens. A freshly installed plugin works with these, with no
+# configuration at all. Each client gets its own file alongside this one.
+name: Default
+
+body:
+  width: 600px
+  background_color: "#f4f4f4"
+  section_background_color: "#ffffff"
+
+palette:
+  text: "#333333"
+  heading: "#111111"
+  muted: "#777777"
+  accent: "#2b6cb0"
+  button_background: "#2b6cb0"
+  button_text: "#ffffff"
+  divider: "#e2e8f0"
+
+typography:
+  font_family: "Helvetica, Arial, sans-serif"
+  heading_size: 24px
+  subheading_size: 18px
+  body_size: 15px
+  small_size: 13px
+  line_height: 1.5
+
+spacing:
+  section_padding: 24px 24px
+  column_padding: 0px
+  button_padding: 12px 24px
+
+button:
+  border_radius: 4px
