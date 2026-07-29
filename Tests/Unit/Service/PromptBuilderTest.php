@@ -62,7 +62,8 @@ final class PromptBuilderTest extends TestCase
         $messages = $this->builder->build('create', 'um hero', null, 'default');
         $last     = end($messages);
 
-        $this->assertStringContainsString('same language as this request', $last['content']);
+        $this->assertStringContainsString('language the request asks for', $last['content']);
+        $this->assertStringContainsString('language the request is written in', $last['content']);
     }
 
     public function testEditModeAsksToKeepTheLanguageOfTheSection(): void

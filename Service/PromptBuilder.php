@@ -126,7 +126,7 @@ final class PromptBuilder
     private function userMessage(string $mode, string $prompt, ?string $source): string
     {
         if (self::MODE_EDIT !== $mode || null === $source) {
-            return $prompt."\n\n(Write the copy in the same language as this request.)";
+            return $prompt."\n\n(Write the copy in the language the request asks for; when it does not ask, use the language the request is written in.)";
         }
 
         return "Current section:\n\n".$source."\n\nRequested change: ".$prompt
