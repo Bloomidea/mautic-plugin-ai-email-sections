@@ -44,3 +44,7 @@
 .gjs-pn-views-container,
 .gjs-pn-views { width: 300px; }
 .gjs-cv-canvas { width: calc(100% - 300px); }
+/* The top options bar is anchored at right: 15% in GrapesJS core, which now
+ * puts its rightmost buttons underneath the wider panel. Anchor it to the
+ * panel edge instead. */
+.gjs-pn-options { right: 300px; }
