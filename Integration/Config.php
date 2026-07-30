@@ -99,7 +99,16 @@ class Config
             ? self::DEFAULT_ANTHROPIC_BASE_URL
             : self::DEFAULT_BASE_URL;
 
-        return $this->string('base_url', $default);
+        $url = $this->string('base_url', $default);
+
+        // The value becomes the target of server-side requests, where only
+        // http(s) has a legitimate use. Anything else falls back to the
+        // provider default rather than turning the plugin into a proxy.
+        if (!in_array(parse_url($url, PHP_URL_SCHEME), ['http', 'https'], true)) {
+            return $default;
+        }
+
+        return $url;
     }
 
     public function getApiKey(): string

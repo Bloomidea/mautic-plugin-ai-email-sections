@@ -120,6 +120,31 @@ final class ConfigTest extends MauticMysqlTestCase
         $this->assertSame('claude-sonnet-5', $config->getModel());
     }
 
+    /**
+     * The stored value goes straight into the HTTP client as the target of
+     * server-side requests. A scheme other than http(s) has no legitimate use
+     * there, so anything else falls back to the provider default instead of
+     * turning the plugin into a proxy for whatever an admin session stores.
+     */
+    public function testABaseUrlWithoutAnHttpSchemeFallsBackToTheProviderDefault(): void
+    {
+        $this->persistIntegration([
+            'integration' => [
+                'provider' => Config::PROVIDER_ANTHROPIC,
+                'base_url' => 'file:///etc/passwd',
+            ],
+        ]);
+
+        $this->assertSame(Config::DEFAULT_ANTHROPIC_BASE_URL, $this->config()->getBaseUrl());
+    }
+
+    public function testASchemeRelativeBaseUrlAlsoFallsBack(): void
+    {
+        $this->persistIntegration(['integration' => ['base_url' => 'litellm.internal/v1']]);
+
+        $this->assertSame(Config::DEFAULT_BASE_URL, $this->config()->getBaseUrl());
+    }
+
     public function testReadsTheBrandBrief(): void
     {
         $this->persistIntegration(['integration' => ['brand' => 'We sell handmade shoes. Address the reader informally.']]);

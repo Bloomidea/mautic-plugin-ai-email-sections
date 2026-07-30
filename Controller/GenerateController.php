@@ -5,9 +5,15 @@ declare(strict_types=1);
 namespace MauticPlugin\AiEmailSectionsBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Mautic\CoreBundle\Controller\AjaxController;
+use Mautic\CoreBundle\Factory\ModelFactory;
+use Mautic\CoreBundle\Helper\CoreParametersHelper;
+use Mautic\CoreBundle\Model\AbstractCommonModel;
 use Mautic\CoreBundle\Helper\UserHelper;
 use Mautic\CoreBundle\Security\Permissions\CorePermissions;
+use Mautic\CoreBundle\Service\FlashBag;
+use Mautic\CoreBundle\Translation\Translator;
 use MauticPlugin\AiEmailSectionsBundle\Entity\Generation;
 use MauticPlugin\AiEmailSectionsBundle\Entity\GenerationRepository;
 use MauticPlugin\AiEmailSectionsBundle\Exception\GenerationFailedException;
@@ -16,8 +22,11 @@ use MauticPlugin\AiEmailSectionsBundle\Integration\Config;
 use MauticPlugin\AiEmailSectionsBundle\Service\GeneratorFactory;
 use MauticPlugin\AiEmailSectionsBundle\Service\PromptBuilder;
 use MauticPlugin\AiEmailSectionsBundle\Service\ThemeCatalog;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
@@ -25,6 +34,24 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 class GenerateController extends AjaxController
 {
     private const MAX_PROMPT_LENGTH = 2000;
+
+    /**
+     * @param ModelFactory<AbstractCommonModel<object>> $modelFactory
+     */
+    public function __construct(
+        ManagerRegistry $doctrine,
+        ModelFactory $modelFactory,
+        UserHelper $userHelper,
+        CoreParametersHelper $coreParametersHelper,
+        EventDispatcherInterface $dispatcher,
+        Translator $translator,
+        FlashBag $flashBag,
+        RequestStack $requestStack,
+        CorePermissions $security,
+        private LoggerInterface $logger,
+    ) {
+        parent::__construct($doctrine, $modelFactory, $userHelper, $coreParametersHelper, $dispatcher, $translator, $flashBag, $requestStack, $security);
+    }
 
     public function generateAction(
         Request $request,
@@ -178,9 +205,10 @@ class GenerateController extends AjaxController
         try {
             $entityManager->persist($record);
             $entityManager->flush();
-        } catch (\Throwable) {
-            // Telemetry must never break a generation. If the table does not exist yet,
-            // or the flush fails, that is not the user's problem.
+        } catch (\Throwable $e) {
+            // Telemetry must never break a generation, but a hole in the audit
+            // trail has to be visible somewhere.
+            $this->logger->error('AiEmailSections: failed to persist the generation record.', ['exception' => $e]);
         }
     }
 

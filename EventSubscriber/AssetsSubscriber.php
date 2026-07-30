@@ -57,7 +57,7 @@ class AssetsSubscriber implements EventSubscriberInterface
             'maxSourceBytes' => $this->config->getMaxSourceBytes(),
             'themes'         => $this->themeCatalog->all(),
             'theme'          => $this->themeCatalog->resolve($this->themeOfEmailBeingEdited(), $this->config->getThemeId()),
-        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES);
+        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG);
 
         $assetsEvent->addScriptDeclaration('window.MauticAiEmailSectionsConfig = '.$settings.';', 'head');
         $assetsEvent->addScript('plugins/AiEmailSectionsBundle/Assets/dist/index.js');

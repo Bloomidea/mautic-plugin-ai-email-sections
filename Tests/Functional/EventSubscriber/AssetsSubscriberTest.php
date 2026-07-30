@@ -57,6 +57,39 @@ final class AssetsSubscriberTest extends MauticMysqlTestCase
         );
     }
 
+    /**
+     * The settings are printed inside an inline <script> block. json_encode
+     * without JSON_HEX_TAG leaves "</script>" intact, and a config value
+     * carrying one would terminate the block and inject markup into every
+     * administration page. The value is admin-authored, but "only an admin can
+     * store the payload" is not a defence a security review accepts.
+     */
+    public function testAConfigValueCannotBreakOutOfTheInlineScriptBlock(): void
+    {
+        $integration = new Integration();
+        $integration->setName(AiEmailSectionsIntegration::NAME);
+        $integration->setIsPublished(true);
+        $integration->setFeatureSettings([
+            'integration' => [
+                'placeholder_image' => 'https://x.example/a.png</script><script>alert(1)</script>',
+            ],
+        ]);
+
+        $this->em->persist($integration);
+        $this->em->flush();
+        $this->em->clear();
+
+        $this->client->request('GET', '/s/dashboard');
+        $this->assertResponseIsSuccessful();
+
+        $content = (string) $this->client->getResponse()->getContent();
+
+        $this->assertStringContainsString('MauticAiEmailSectionsConfig', $content);
+        // The payload must be present (the config carried it) but neutralised.
+        $this->assertStringContainsString('x.example', $content);
+        $this->assertStringNotContainsString('</script><script>alert(1)', $content);
+    }
+
     private function publishIntegration(): Integration
     {
         $integration = new Integration();
