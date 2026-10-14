@@ -95,6 +95,8 @@ The two tabs are built differently by the IntegrationsBundle and store to differ
 
 The API key is stored on the encrypted auth tab and never reaches the browser.
 
+**Generations per hour** counts every generation the user made in the last hour, failed and unchanged ones included, since each cost a model call. Zero or less turns the limit off. When it is reached the endpoint answers `429` with a `Retry-After` header and a `retryAt` timestamp: the moment the generation holding the user at the limit leaves the hour window. The panel shows that time in the browser's own time zone ("You can generate again at 16:53") rather than "try again shortly", which sent people clicking every minute.
+
 **Brand and tone of voice** is optional free text describing what you sell, who you are writing to, how formal to be, and anything to avoid. It is appended to the end of the system prompt, capped at 2000 characters because it travels on every generation. Leave it empty and the assistant still works, it just writes more generic copy. In a 12-case comparison, filling it in removed every exclamation mark from the output and roughly doubled how often the copy mentioned what the company actually makes.
 
 It sits at the end of the prompt on purpose: ahead of the allowlist, an unlucky phrasing could talk the model out of it, and the symptom would be every generation failing validation for no visible reason.
@@ -244,6 +246,8 @@ The endpoint is `POST /s/ai-email-sections/generate`. Core's `RequestSubscriber`
 4. Write the prompt in the language you want the copy in. The system prompt and the examples are English; the copy follows the request, not the instructions. A hint under the textarea says so.
 5. To change an existing section, select it and use the wand icon in the toolbar. The prompt describes the change; the current section is sent as the source. Edit mode keeps the language the section is already written in, whatever language you type the request in.
 6. The whole replacement collapses into a single undo step.
+7. When an edit comes back unchanged, the section is left alone and the panel says so, suggesting the request may be about the whole email (its width, every button), which editing one section cannot reach. The comparison runs both sides through the validator's serialiser, so `&nbsp;` against a literal non-breaking space, or the model's own indentation, does not count as a change. On 14/10/2026 a third of one afternoon's generations came back unchanged and were swapped in silently, so the same request went out again and again.
+8. Validator warnings appear as a flash message above the builder and stay until closed.
 
 ## Theme tokens
 
@@ -321,6 +325,8 @@ After serialisation, percent-encoded braces in a token position are written back
 
 Edit mode adds preservation invariants. Images and `{...}` tokens are hard rejections: losing either fails the attempt. Links and text volume are soft, and on the final attempt they degrade into a visible warning rather than a failure.
 
+An attribute a tag does not declare in MJML 4.15.3 (the `mjml-browser` the builder compiles with) gets a warning, never an error: MJML drops it at render time, so a change made through it replaces the section and shows nothing, and retrying cannot help when the request has no section-level answer. `width` on `mj-section`, from a request for a 600 px email, is the case that prompted it. In edit mode an attribute the source already carried is not reported. The per-tag lists live in `MjmlValidator::MJML_ATTRIBUTES`; a test checks that none of the few-shot examples trips them.
+
 ## Telemetry
 
 Every generation is recorded in `ai_email_sections_generation`: prompt, mode, theme, model, attempt count, validation errors, warnings, latency and the response that finally passed. That is what makes it possible to compare providers and models with data instead of impressions.
@@ -351,7 +357,7 @@ cd ../plugins/AiEmailSectionsBundle
 npx jest
 ```
 
-135 PHP tests and 38 JS tests. The functional ones prove that the script is only injected while the integration is published, that the API key never reaches the browser, and that the endpoint refuses requests without CSRF.
+156 PHP tests and 46 JS tests. The functional ones prove that the script is only injected while the integration is published, that the API key never reaches the browser, and that the endpoint refuses requests without CSRF.
 
 Two things to know before writing tests here:
 

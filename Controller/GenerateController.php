@@ -9,8 +9,8 @@ use Doctrine\Persistence\ManagerRegistry;
 use Mautic\CoreBundle\Controller\AjaxController;
 use Mautic\CoreBundle\Factory\ModelFactory;
 use Mautic\CoreBundle\Helper\CoreParametersHelper;
-use Mautic\CoreBundle\Model\AbstractCommonModel;
 use Mautic\CoreBundle\Helper\UserHelper;
+use Mautic\CoreBundle\Model\AbstractCommonModel;
 use Mautic\CoreBundle\Security\Permissions\CorePermissions;
 use Mautic\CoreBundle\Service\FlashBag;
 use Mautic\CoreBundle\Translation\Translator;
@@ -23,8 +23,8 @@ use MauticPlugin\AiEmailSectionsBundle\Service\GeneratorFactory;
 use MauticPlugin\AiEmailSectionsBundle\Service\PromptBuilder;
 use MauticPlugin\AiEmailSectionsBundle\Service\ThemeCatalog;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -120,12 +120,10 @@ class GenerateController extends AjaxController
         /** @var GenerationRepository $repository */
         $repository = $entityManager->getRepository(Generation::class);
 
-        if (null !== $userId && $this->overRateLimit($repository, $userId, $config)) {
-            return $this->error(
-                'rate_limited',
-                'mautic.aiemailsections.error.rate_limited',
-                Response::HTTP_TOO_MANY_REQUESTS
-            );
+        $limitedUntil = null !== $userId ? $this->limitedUntil($repository, $userId, $config) : null;
+
+        if (null !== $limitedUntil) {
+            return $this->rateLimited($limitedUntil);
         }
 
         // The builder panel offers a theme per generation, so a section can match
@@ -180,24 +178,51 @@ class GenerateController extends AjaxController
             ->setWarnings($outcome->warnings)
             ->setLatencyMs($outcome->latencyMs));
 
+        // An unchanged section still counts towards the limit: it cost the same
+        // model call as any other.
         return new JsonResponse([
-            'mjml'     => $outcome->mjml,
-            'attempts' => $outcome->attempts,
-            'warnings' => $outcome->warnings,
+            'mjml'      => $outcome->mjml,
+            'attempts'  => $outcome->attempts,
+            'warnings'  => $outcome->warnings,
+            'unchanged' => $outcome->unchanged,
         ]);
     }
 
-    private function overRateLimit(GenerationRepository $repository, int $userId, Config $config): bool
+    /**
+     * When the user may generate again, or null when they may now.
+     */
+    private function limitedUntil(GenerationRepository $repository, int $userId, Config $config): ?\DateTimeImmutable
     {
         $limit = $config->getRateLimitPerHour();
 
         if ($limit <= 0) {
-            return false;
+            return null;
         }
 
-        $since = new \DateTimeImmutable('-1 hour');
+        $limiting = $repository->findLimitingCreatedAt($userId, new \DateTimeImmutable('-1 hour'), $limit);
 
-        return $repository->countSince($userId, $since) >= $limit;
+        return null === $limiting ? null : \DateTimeImmutable::createFromInterface($limiting)->modify('+1 hour');
+    }
+
+    /**
+     * "Try again shortly" sent people clicking every minute. The response says
+     * when, as an absolute time for the panel to show in the browser's own time
+     * zone, and as the standard Retry-After header for anything else.
+     */
+    private function rateLimited(\DateTimeImmutable $until): JsonResponse
+    {
+        $seconds = max(1, $until->getTimestamp() - time());
+
+        return new JsonResponse(
+            [
+                'error'      => 'rate_limited',
+                'message'    => $this->translator->trans('mautic.aiemailsections.error.rate_limited'),
+                'retryAt'    => $until->format(\DateTimeInterface::ATOM),
+                'retryAfter' => $seconds,
+            ],
+            Response::HTTP_TOO_MANY_REQUESTS,
+            ['Retry-After' => (string) $seconds]
+        );
     }
 
     private function persist(EntityManagerInterface $entityManager, Generation $record): void

@@ -26,6 +26,62 @@ final class MjmlValidator
      */
     private const VOID_MJ_TAGS = ['mj-image', 'mj-divider', 'mj-spacer', 'mj-font'];
 
+    /**
+     * Attributes each allowed tag declares in MJML 4.15.3, the mjml-browser
+     * the builder compiles with (each component's allowedAttributes). MJML
+     * drops anything else at render time without a word.
+     */
+    private const MJML_ATTRIBUTES = [
+        'mj-section' => [
+            'background-color', 'background-url', 'background-repeat', 'background-size',
+            'background-position', 'background-position-x', 'background-position-y',
+            'border', 'border-bottom', 'border-left', 'border-radius', 'border-right', 'border-top',
+            'direction', 'full-width', 'padding', 'padding-top', 'padding-bottom', 'padding-left',
+            'padding-right', 'text-align', 'text-padding',
+        ],
+        'mj-column' => [
+            'background-color', 'border', 'border-bottom', 'border-left', 'border-radius',
+            'border-right', 'border-top', 'direction', 'inner-background-color', 'padding-bottom',
+            'padding-left', 'padding-right', 'padding-top', 'inner-border', 'inner-border-bottom',
+            'inner-border-left', 'inner-border-radius', 'inner-border-right', 'inner-border-top',
+            'padding', 'vertical-align', 'width',
+        ],
+        'mj-group' => ['background-color', 'direction', 'vertical-align', 'width'],
+        'mj-text'  => [
+            'align', 'background-color', 'color', 'container-background-color', 'font-family',
+            'font-size', 'font-style', 'font-weight', 'height', 'letter-spacing', 'line-height',
+            'padding-bottom', 'padding-left', 'padding-right', 'padding-top', 'padding',
+            'text-decoration', 'text-transform', 'vertical-align',
+        ],
+        'mj-image' => [
+            'alt', 'href', 'name', 'src', 'srcset', 'sizes', 'title', 'rel', 'align', 'border',
+            'border-bottom', 'border-left', 'border-right', 'border-top', 'border-radius',
+            'container-background-color', 'fluid-on-mobile', 'padding', 'padding-bottom',
+            'padding-left', 'padding-right', 'padding-top', 'target', 'width', 'height',
+            'max-height', 'font-size', 'usemap',
+        ],
+        'mj-button' => [
+            'align', 'background-color', 'border-bottom', 'border-left', 'border-radius',
+            'border-right', 'border-top', 'border', 'color', 'container-background-color',
+            'font-family', 'font-size', 'font-style', 'font-weight', 'height', 'href', 'name',
+            'title', 'inner-padding', 'letter-spacing', 'line-height', 'padding-bottom',
+            'padding-left', 'padding-right', 'padding-top', 'padding', 'rel', 'target',
+            'text-decoration', 'text-transform', 'vertical-align', 'text-align', 'width',
+        ],
+        'mj-divider' => [
+            'border-color', 'border-style', 'border-width', 'container-background-color', 'padding',
+            'padding-bottom', 'padding-left', 'padding-right', 'padding-top', 'width', 'align',
+        ],
+        'mj-spacer' => [
+            'border', 'border-bottom', 'border-left', 'border-right', 'border-top',
+            'container-background-color', 'padding-bottom', 'padding-left', 'padding-right',
+            'padding-top', 'padding', 'height',
+        ],
+    ];
+
+    /** Accepted on every tag, as in MJML's own validator. */
+    private const MJML_GLOBAL_ATTRIBUTES = ['mj-class', 'css-class'];
+
     /** HTML accepted inside mj-text and mj-button. */
     public const ALLOWED_INLINE_TAGS = [
         'p', 'br', 'strong', 'em', 'b', 'i', 'u', 'a',
@@ -122,6 +178,8 @@ final class MjmlValidator
             return ValidationResult::fail($errors);
         }
 
+        $this->warnAboutIgnoredAttributes($document, $source, $warnings);
+
         $out = $this->decodeTokenBraces(strtr($this->serialise($document, $root), $richText));
 
         if (null !== $source) {
@@ -200,6 +258,71 @@ final class MjmlValidator
         }
 
         array_push($errors, ...$soft);
+    }
+
+    /**
+     * A change carried by an attribute the tag does not have replaces the
+     * section and shows nothing. On 14/10/2026 a request for a 600 px email
+     * came back as width="600px" on mj-section, and the person sent it again.
+     * A warning, not an error: retrying cannot help when the request has no
+     * section-level answer, and every retry costs a model call.
+     *
+     * Only what the model introduced is reported. An attribute the source
+     * already carried was there before the request.
+     *
+     * @param string[] $warnings
+     */
+    private function warnAboutIgnoredAttributes(\DOMDocument $document, ?string $source, array &$warnings): void
+    {
+        $existing = null === $source ? [] : $this->attributeNamesByTag($source);
+        $reported = [];
+
+        foreach ($document->getElementsByTagName('*') as $element) {
+            $tag = $element->nodeName;
+
+            if (!isset(self::MJML_ATTRIBUTES[$tag])) {
+                continue;
+            }
+
+            /** @var \DOMAttr $attribute */
+            foreach (iterator_to_array($element->attributes) as $attribute) {
+                $name = strtolower($attribute->nodeName);
+
+                if (in_array($name, self::MJML_ATTRIBUTES[$tag], true)
+                    || in_array($name, self::MJML_GLOBAL_ATTRIBUTES, true)
+                    || isset($existing[$tag][$name])
+                    || isset($reported[$tag][$name])) {
+                    continue;
+                }
+
+                $reported[$tag][$name] = true;
+                $warnings[]            = sprintf(
+                    '<%s> has no %s attribute, so MJML ignores it and that part of the change does not show.',
+                    $tag,
+                    $attribute->nodeName
+                );
+            }
+        }
+    }
+
+    /**
+     * @return array<string, array<string, true>>
+     */
+    private function attributeNamesByTag(string $mjml): array
+    {
+        preg_match_all('#<(mj-[a-z-]+)\b([^>]*)>#i', $mjml, $tags, PREG_SET_ORDER);
+
+        $names = [];
+
+        foreach ($tags as $tag) {
+            preg_match_all('#([a-zA-Z0-9:_.-]+)\s*=#', $tag[2], $attributes);
+
+            foreach ($attributes[1] as $attribute) {
+                $names[strtolower($tag[1])][strtolower($attribute)] = true;
+            }
+        }
+
+        return $names;
     }
 
     /**

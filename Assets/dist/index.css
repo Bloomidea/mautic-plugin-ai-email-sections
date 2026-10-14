@@ -8,6 +8,7 @@
 .gjs-assistant__run[disabled] { opacity: .5; cursor: not-allowed; }
 .gjs-assistant__status { margin-top: 6px; font-size: 11px; line-height: 1.4; min-height: 14px; }
 .gjs-assistant__status.is-error { color: #e57373; }
+.gjs-assistant__status.is-notice { color: #ffb74d; }
 .gjs-assistant__status.is-loading { opacity: .7; }
 .gjs-assistant--loading { opacity: .5; }
 .gjs-assistant__hint { margin-top: 4px; font-size: 10px; opacity: .6; line-height: 1.3; }

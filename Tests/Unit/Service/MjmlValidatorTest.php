@@ -256,4 +256,75 @@ final class MjmlValidatorTest extends TestCase
         $this->assertTrue($result->isValid(), implode(' | ', $result->getErrors()));
         $this->assertSame([], $result->getWarnings());
     }
+
+    /**
+     * Generation 131 in production, 14/10/2026: asked for a 600 px email, the
+     * model set width on mj-section. MJML drops it, so the section was
+     * replaced and nothing showed, with no word from the validator.
+     */
+    public function testWarnsAboutAnAttributeMjmlIgnores(): void
+    {
+        $result = $this->validator->validate(
+            '<mj-section width="600px"><mj-column><mj-text>Hi</mj-text></mj-column></mj-section>'
+        );
+
+        $this->assertTrue($result->isValid(), implode(' | ', $result->getErrors()));
+        $this->assertSame(
+            ['<mj-section> has no width attribute, so MJML ignores it and that part of the change does not show.'],
+            $result->getWarnings()
+        );
+    }
+
+    public function testReportsEachIgnoredAttributeOnce(): void
+    {
+        $result = $this->validator->validate(
+            '<mj-section width="600px"><mj-column><mj-text>A</mj-text></mj-column></mj-section>'
+            .'<mj-section width="600px"><mj-column><mj-text>B</mj-text></mj-column></mj-section>'
+        );
+
+        $this->assertCount(1, $result->getWarnings());
+    }
+
+    public function testAcceptsTheAttributesMjmlAllowsOnEveryTag(): void
+    {
+        $result = $this->validator->validate(
+            '<mj-section css-class="hero" mj-class="brand"><mj-column><mj-text css-class="lead">Hi</mj-text></mj-column></mj-section>'
+        );
+
+        $this->assertSame([], $result->getWarnings());
+    }
+
+    /**
+     * Whatever GrapesJS or an earlier edit left on the section was there
+     * before the request, and blaming this change for it would be noise.
+     */
+    public function testDoesNotReportAnIgnoredAttributeTheSourceAlreadyHad(): void
+    {
+        $source = '<mj-section width="600px"><mj-column><mj-text>Hi</mj-text></mj-column></mj-section>';
+        $output = '<mj-section width="600px" background-color="#fafafa"><mj-column><mj-text>Hi</mj-text></mj-column></mj-section>';
+
+        $result = $this->validator->validate($output, $source, 'fundo creme');
+
+        $this->assertTrue($result->isValid(), implode(' | ', $result->getErrors()));
+        $this->assertSame([], $result->getWarnings());
+    }
+
+    /**
+     * The few-shot examples are what the model copies. An attribute there that
+     * MJML ignores would be taught on every generation, and would also mean
+     * the attribute list above is missing something.
+     */
+    public function testTheExamplesUseNoAttributeMjmlIgnores(): void
+    {
+        $files = glob(__DIR__.'/../../../Resources/prompts/examples*/*.mjml') ?: [];
+
+        $this->assertNotEmpty($files);
+
+        foreach ($files as $file) {
+            $result = $this->validator->validate((string) file_get_contents($file));
+
+            $this->assertTrue($result->isValid(), basename($file).': '.implode(' | ', $result->getErrors()));
+            $this->assertSame([], $result->getWarnings(), basename($file));
+        }
+    }
 }

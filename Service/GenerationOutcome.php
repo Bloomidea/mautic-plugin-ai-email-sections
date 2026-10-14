@@ -12,6 +12,7 @@ final class GenerationOutcome
     /**
      * @param string[] $warnings
      * @param string[] $rawResponses
+     * @param bool     $unchanged    edit mode only: the section came back as it was sent
      */
     public function __construct(
         public readonly string $mjml,
@@ -19,6 +20,7 @@ final class GenerationOutcome
         public readonly array $warnings = [],
         public readonly array $rawResponses = [],
         public readonly int $latencyMs = 0,
+        public readonly bool $unchanged = false,
     ) {
     }
 

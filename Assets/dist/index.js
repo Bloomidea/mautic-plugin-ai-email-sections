@@ -65,11 +65,35 @@
           if (!response.ok) {
             var error = new Error(data.message || t('mautic.aiemailsections.error.generic', 'The block could not be generated.'));
             error.code = data.error;
+            error.retryAt = data.retryAt;
             throw error;
           }
           return data;
         });
     });
+  }
+
+  /**
+   * The server sends the time the limit lifts as an absolute instant, so it
+   * is shown in the browser's own time zone rather than in Mautic's.
+   */
+  function describeError(error) {
+    if (error.code !== 'rate_limited' || !error.retryAt) {
+      return error.message;
+    }
+
+    var retryAt = new Date(error.retryAt);
+
+    if (isNaN(retryAt.getTime())) {
+      return error.message;
+    }
+
+    var time = retryAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    return t(
+      'mautic.aiemailsections.error.rate_limited_until',
+      'Generation limit reached. You can generate again at %time%.'
+    ).replace('%time%', time);
   }
 
   /* -------------------------------------------------------------- helpers */
@@ -350,6 +374,27 @@
 
       requestGeneration(payload)
         .then(function (data) {
+          // Swapping a section for itself would look like success and change
+          // nothing, which is what sent people resubmitting the same request.
+          // The canvas and the undo stack stay as they are, and the prompt
+          // stays written so it can be rephrased.
+          if (data.unchanged) {
+            button.disabled = false;
+            setStatus(
+              t(
+                'mautic.aiemailsections.notice.unchanged',
+                'Nothing changed in this section. If the request is about the whole email, such as its width or every button, editing one section cannot do it.'
+              ),
+              'notice'
+            );
+
+            if (data.warnings && data.warnings.length) {
+              alertWarnings(data.warnings);
+            }
+
+            return;
+          }
+
           // On success the target is replaced in its exact position.
           var replaced = replaceWithMjml(editor, target, data.mjml);
 
@@ -376,20 +421,37 @@
           // On any error the target is left exactly as it was.
           button.disabled = false;
           component.removeClass('gjs-assistant--loading');
-          setStatus(error.message, 'error');
+          setStatus(describeError(error), 'error');
         });
     });
 
     return wrapper;
   }
 
+  /**
+   * addInfoFlashMessage only builds the element, and setFlashes is what puts it
+   * on screen: called alone, as it was until 14/10/2026, no warning ever
+   * showed. The element is built with innerHTML, and the warnings name MJML
+   * tags and echo URLs, so they go in escaped. They stay until closed, because
+   * a sentence that fades after four seconds is easy to miss mid-edit.
+   */
   function alertWarnings(warnings) {
-    if (window.Mautic && typeof window.Mautic.addInfoFlashMessage === 'function') {
-      window.Mautic.addInfoFlashMessage(warnings.join(' '));
+    var mautic = window.Mautic;
+    var text = warnings.join(' ');
+
+    if (mautic && typeof mautic.addInfoFlashMessage === 'function' && typeof mautic.setFlashes === 'function') {
+      mautic.setFlashes(mautic.addInfoFlashMessage(escapeHtml(text)), false);
       return;
     }
     /* eslint-disable-next-line no-console */
-    console.warn('[AI Email Sections]', warnings.join(' '));
+    console.warn('[AI Email Sections]', text);
+  }
+
+  function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text;
+
+    return div.innerHTML;
   }
 
   /* ------------------------------------------------------------- plugin */

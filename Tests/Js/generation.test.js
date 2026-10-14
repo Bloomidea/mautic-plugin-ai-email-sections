@@ -11,6 +11,7 @@ const { FakeComponent, createFakeEditor, buildSectionTree } = require('./helpers
 
 const SOURCE = path.join(__dirname, '../../Assets/src/index.js');
 const GENERATED = '<mj-section background-color="#ffffff"><mj-column><mj-text>Hi</mj-text></mj-column></mj-section>';
+const WIDTH_WARNING = '<mj-section> has no width attribute, so MJML ignores it and that part of the change does not show.';
 
 function setup() {
   delete window.MauticGrapesJsPlugins;
@@ -53,6 +54,24 @@ function openPromptUi(editor, component) {
     status: el.querySelector('.gjs-assistant__status'),
     label: el.querySelector('.gjs-assistant__target'),
     theme: el.querySelector('.gjs-assistant__theme'),
+  };
+}
+
+/**
+ * The two flash helpers as Mautic 7 core has them (1.core.js): one builds the
+ * element with innerHTML, the other appends it to #flashes.
+ */
+function fakeMautic() {
+  document.body.insertAdjacentHTML('beforeend', '<div id="flashes"></div>');
+
+  return {
+    addInfoFlashMessage: (message) => {
+      const el = document.createElement('div');
+      el.className = 'alert alert-growl';
+      el.innerHTML = '<span>' + message + '</span>';
+      return el;
+    },
+    setFlashes: jest.fn((el) => document.getElementById('flashes').appendChild(el)),
   };
 }
 
@@ -219,6 +238,155 @@ describe('edit mode', () => {
 
     expect(ui.button.disabled).toBe(true);
     expect(ui.status.textContent).toContain('too large');
+  });
+});
+
+describe('a section that comes back unchanged', () => {
+  /**
+   * On 14/10/2026 a third of one afternoon's generations returned the section
+   * as it was sent. Swapping it in looked like success and changed nothing, so
+   * the same request went out again and again.
+   */
+  let editor;
+  let section;
+  let body;
+
+  beforeEach(() => {
+    editor = setup();
+    const text = new FakeComponent({ type: 'mj-text', tagName: 'mj-text' });
+    const tree = buildSectionTree(editor, text);
+    section = tree.section;
+    body = tree.body;
+    stubProvider({ mjml: '<mj-section>original</mj-section>', attempts: 1, warnings: [], unchanged: true });
+  });
+
+  test('leaves the canvas and the undo history alone', async () => {
+    const ui = openPromptUi(editor, section);
+    ui.textarea.value = 'largura total de 600 px';
+    ui.button.click();
+    await flush();
+
+    expect(body.components().at(0)).toBe(section);
+    expect(editor.undoStack.length).toBe(0);
+  });
+
+  test('says nothing changed and points at requests about the whole email', async () => {
+    const ui = openPromptUi(editor, section);
+    ui.textarea.value = 'largura total de 600 px';
+    ui.button.click();
+    await flush();
+
+    expect(ui.status.textContent).toContain('Nothing changed in this section');
+    expect(ui.status.textContent).toContain('whole email');
+    expect(ui.status.className).toContain('is-notice');
+    expect(ui.button.disabled).toBe(false);
+  });
+
+  test('still surfaces the validator warnings, which may say why', async () => {
+    stubProvider({
+      mjml: '<mj-section>original</mj-section>',
+      attempts: 1,
+      warnings: [WIDTH_WARNING],
+      unchanged: true,
+    });
+
+    const ui = openPromptUi(editor, section);
+    window.Mautic = fakeMautic();
+    ui.textarea.value = 'largura total de 600 px';
+    ui.button.click();
+    await flush();
+
+    expect(document.getElementById('flashes').textContent).toContain('no width attribute');
+    delete window.Mautic;
+  });
+});
+
+describe('validator warnings', () => {
+  /**
+   * Until 14/10/2026 the panel called addInfoFlashMessage alone, which in
+   * Mautic 7 builds the element and never displays it, so no warning ever
+   * reached the screen.
+   */
+  let editor;
+  let placeholder;
+
+  beforeEach(() => {
+    editor = setup();
+    placeholder = new FakeComponent({ type: 'assistant-placeholder', tagName: 'mj-text' });
+    buildSectionTree(editor, placeholder);
+    stubProvider({ mjml: GENERATED, attempts: 1, warnings: [WIDTH_WARNING] });
+  });
+
+  afterEach(() => {
+    delete window.Mautic;
+  });
+
+  async function generate() {
+    const ui = openPromptUi(editor, placeholder);
+    window.Mautic = fakeMautic();
+    ui.textarea.value = 'a welcome banner';
+    ui.button.click();
+    await flush();
+    // The success path defers the warnings by one tick, after the select.
+    await flush();
+  }
+
+  test('puts them on screen, not just in a detached element', async () => {
+    await generate();
+
+    expect(window.Mautic.setFlashes).toHaveBeenCalledTimes(1);
+    expect(document.getElementById('flashes').children.length).toBe(1);
+  });
+
+  test('shows the tag names they mention instead of parsing them as HTML', async () => {
+    await generate();
+
+    expect(document.getElementById('flashes').textContent).toBe(WIDTH_WARNING);
+  });
+
+  test('keeps them until closed rather than fading after four seconds', async () => {
+    await generate();
+
+    expect(window.Mautic.setFlashes.mock.calls[0][1]).toBe(false);
+  });
+});
+
+describe('rate limit', () => {
+  function rateLimited(extra) {
+    stubProvider(
+      Object.assign({ error: 'rate_limited', message: 'Generation limit reached. Try again shortly.' }, extra),
+      false
+    );
+  }
+
+  test('says when the limit lifts, in the browser time zone', async () => {
+    const editor = setup();
+    const placeholder = new FakeComponent({ type: 'assistant-placeholder', tagName: 'mj-text' });
+    buildSectionTree(editor, placeholder);
+    rateLimited({ retryAt: '2026-10-14T14:26:00+00:00', retryAfter: 1800 });
+
+    const ui = openPromptUi(editor, placeholder);
+    ui.textarea.value = 'a welcome banner';
+    ui.button.click();
+    await flush();
+
+    const time = new Date('2026-10-14T14:26:00+00:00').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    expect(ui.status.textContent).toBe('Generation limit reached. You can generate again at ' + time + '.');
+    expect(ui.status.className).toContain('is-error');
+  });
+
+  test('falls back to the server message when no time came with it', async () => {
+    const editor = setup();
+    const placeholder = new FakeComponent({ type: 'assistant-placeholder', tagName: 'mj-text' });
+    buildSectionTree(editor, placeholder);
+    rateLimited({});
+
+    const ui = openPromptUi(editor, placeholder);
+    ui.textarea.value = 'a welcome banner';
+    ui.button.click();
+    await flush();
+
+    expect(ui.status.textContent).toBe('Generation limit reached. Try again shortly.');
   });
 });
 

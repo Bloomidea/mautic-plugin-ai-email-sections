@@ -85,6 +85,59 @@ final class GeneratorServiceTest extends TestCase
         $this->assertStringContainsString('mj-carousel', $outcome->rawResponses[0]);
     }
 
+    public function testFlagsAnEditThatCameBackAsItWasSent(): void
+    {
+        $source = '<mj-section><mj-column><mj-text><p>Ol&#xE1;</p></mj-text></mj-column></mj-section>';
+        $client = new ScriptedLlmClient([$source]);
+
+        $outcome = $this->service($client)->generate('edit', 'largura total de 600 px', $source, 'default');
+
+        $this->assertTrue($outcome->unchanged);
+        $this->assertSame(1, $outcome->attempts);
+    }
+
+    /**
+     * Production generations 75, 109 and 124 came back identical apart from
+     * how the same characters were written (&nbsp; against U+00A0, ç against
+     * &#xE7;), plus the model's own indentation. None of that is a change.
+     */
+    public function testIgnoresDifferencesInHowTheSameMarkupIsWritten(): void
+    {
+        $source = '<mj-section><mj-column><mj-text><p>Devoluções&nbsp;simples</p></mj-text></mj-column></mj-section>';
+        $output = "<mj-section>\n  <mj-column>\n    <mj-text><p>Devolu&#xE7;&#xF5;es\u{00A0}simples</p></mj-text>\n  </mj-column>\n</mj-section>";
+
+        $outcome = $this->service(new ScriptedLlmClient([$output]))->generate('edit', 'uniformiza os botões', $source, 'default');
+
+        $this->assertTrue($outcome->unchanged);
+    }
+
+    public function testASpaceBetweenWordsIsAChange(): void
+    {
+        $source = '<mj-section><mj-column><mj-text><p><strong>Novo</strong><em>drop</em></p></mj-text></mj-column></mj-section>';
+        $output = '<mj-section><mj-column><mj-text><p><strong>Novo</strong> <em>drop</em></p></mj-text></mj-column></mj-section>';
+
+        $outcome = $this->service(new ScriptedLlmClient([$output]))->generate('edit', 'separa as palavras', $source, 'default');
+
+        $this->assertFalse($outcome->unchanged);
+    }
+
+    public function testAnEditThatChangedSomethingIsNotFlagged(): void
+    {
+        $source = '<mj-section><mj-column><mj-text>Hello</mj-text></mj-column></mj-section>';
+        $output = '<mj-section background-color="#fafafa"><mj-column><mj-text>Hello</mj-text></mj-column></mj-section>';
+
+        $outcome = $this->service(new ScriptedLlmClient([$output]))->generate('edit', 'fundo creme', $source, 'default');
+
+        $this->assertFalse($outcome->unchanged);
+    }
+
+    public function testCreateModeIsNeverUnchanged(): void
+    {
+        $outcome = $this->service(new ScriptedLlmClient([self::VALID]))->generate('create', 'grelha', null, 'default');
+
+        $this->assertFalse($outcome->unchanged);
+    }
+
     private function service(LlmClientInterface $client): GeneratorService
     {
         return new GeneratorService(
