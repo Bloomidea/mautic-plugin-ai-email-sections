@@ -30,7 +30,7 @@ The official `mautic/mautic` Docker image ships no `composer.json`, so there `co
 
 ```bash
 cd /path/to/mautic/plugins          # or docroot/plugins on the Docker image
-git clone --branch v1.0.0 --depth 1 https://github.com/Bloomidea/mautic-plugin-ai-email-sections.git AiEmailSectionsBundle
+git clone --branch v1.0.7 --depth 1 https://github.com/Bloomidea/mautic-plugin-ai-email-sections.git AiEmailSectionsBundle
 rm -rf AiEmailSectionsBundle/.git
 chown -R www-data:www-data AiEmailSectionsBundle
 cd /path/to/mautic
@@ -208,9 +208,9 @@ Different sizes mean the file shipped correctly and the edge is stale.
 
 **5. Then it is the browser.** Reload ignoring the cache, or check in devtools that `index.js` is actually requested on the builder page.
 
-### Changing an asset needs a cache purge, every time
+### Changing the icon needs a cache purge, every time
 
-Mautic appends `?v<hash>` to asset URLs, and **that hash is derived from configuration, not from file contents**. Editing `index.js` or the icon therefore changes the file while leaving the URL identical, so neither the browser nor a CDN has any reason to refetch it. The new file sits on the server, correct and unreachable.
+Mautic appends `?v<hash>` to asset URLs, and **that hash is derived from configuration, not from file contents**. Editing the icon therefore changes the file while leaving the URL identical, so neither the browser nor a CDN has any reason to refetch it. The new file sits on the server, correct and unreachable. Since v1.0.7 the panel's script and stylesheet carry a hash of their own contents (see [Frontend](#frontend)), so a new version of either reaches the browser without a purge.
 
 Behind Cloudflare, purging by URL means purging the exact URL *including* the query string: `icon.png?v9fbd16a` and `icon.png` are separate objects, and purging the second leaves the first, which is the one the page requests. Purging by URL failed for us on 2026-07-25 and a "Purge Everything" was what worked.
 
