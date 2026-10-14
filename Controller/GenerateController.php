@@ -10,7 +10,6 @@ use Mautic\CoreBundle\Controller\AjaxController;
 use Mautic\CoreBundle\Factory\ModelFactory;
 use Mautic\CoreBundle\Helper\CoreParametersHelper;
 use Mautic\CoreBundle\Helper\UserHelper;
-use Mautic\CoreBundle\Model\AbstractCommonModel;
 use Mautic\CoreBundle\Security\Permissions\CorePermissions;
 use Mautic\CoreBundle\Service\FlashBag;
 use Mautic\CoreBundle\Translation\Translator;
@@ -36,7 +35,7 @@ class GenerateController extends AjaxController
     private const MAX_PROMPT_LENGTH = 2000;
 
     /**
-     * @param ModelFactory<AbstractCommonModel<object>> $modelFactory
+     * @param ModelFactory<object> $modelFactory
      */
     public function __construct(
         ManagerRegistry $doctrine,
