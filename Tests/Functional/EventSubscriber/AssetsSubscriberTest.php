@@ -40,6 +40,25 @@ final class AssetsSubscriberTest extends MauticMysqlTestCase
         $this->assertStringContainsString('/s/ai-email-sections/generate', $content);
     }
 
+    /**
+     * Mautic's own ?v suffix comes from configuration and survives a deploy
+     * that changes the file, so a CDN or a browser kept serving the old panel
+     * after the 14/10/2026 deploy. The URL has to change with the content.
+     */
+    public function testTheAssetUrlsChangeWithTheirContent(): void
+    {
+        $this->publishIntegration();
+
+        $this->client->request('GET', '/s/dashboard');
+        $content = (string) $this->client->getResponse()->getContent();
+
+        foreach (['index.js', 'index.css'] as $file) {
+            $hash = substr((string) md5_file(__DIR__.'/../../../Assets/dist/'.$file), 0, 8);
+
+            $this->assertStringContainsString('AiEmailSectionsBundle/Assets/dist/'.$file.'?h='.$hash, $content);
+        }
+    }
+
     public function testNeverLeaksTheApiKeyToTheBrowser(): void
     {
         $integration = $this->publishIntegration();

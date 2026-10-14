@@ -60,8 +60,24 @@ class AssetsSubscriber implements EventSubscriberInterface
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG);
 
         $assetsEvent->addScriptDeclaration('window.MauticAiEmailSectionsConfig = '.$settings.';', 'head');
-        $assetsEvent->addScript('plugins/AiEmailSectionsBundle/Assets/dist/index.js');
-        $assetsEvent->addStylesheet('plugins/AiEmailSectionsBundle/Assets/dist/index.css');
+        $assetsEvent->addScript($this->versioned('Assets/dist/index.js'));
+        $assetsEvent->addStylesheet($this->versioned('Assets/dist/index.css'));
+    }
+
+    /**
+     * Mautic versions asset URLs from its configuration, not from the file, so
+     * an edited script keeps its URL, and the response carries no Cache-Control.
+     * After the 14/10/2026 deploy Cloudflare kept serving the previous panel
+     * from the edge, and a browser may keep its copy for hours on heuristic
+     * freshness. A hash of the file in the URL makes every change a new URL.
+     * Mautic appends its own version after it.
+     */
+    private function versioned(string $file): string
+    {
+        $url  = 'plugins/AiEmailSectionsBundle/'.$file;
+        $hash = md5_file(__DIR__.'/../'.$file);
+
+        return false === $hash ? $url : $url.'?h='.substr($hash, 0, 8);
     }
 
     /**

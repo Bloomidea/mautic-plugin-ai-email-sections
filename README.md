@@ -357,7 +357,7 @@ cd ../plugins/AiEmailSectionsBundle
 npx jest
 ```
 
-156 PHP tests and 46 JS tests. The functional ones prove that the script is only injected while the integration is published, that the API key never reaches the browser, and that the endpoint refuses requests without CSRF.
+157 PHP tests and 46 JS tests. The functional ones prove that the script is only injected while the integration is published, that the API key never reaches the browser, and that the endpoint refuses requests without CSRF.
 
 Two things to know before writing tests here:
 
@@ -374,7 +374,7 @@ Registration goes through `window.MauticGrapesJsPlugins` with `context: ['email-
 
 Two traps when working on this file:
 
-- **Assets are versioned by a hash that does not change when you edit them.** Mautic appends `?v<hash>` derived from configuration, not from file contents, so the browser keeps serving the cached copy indefinitely. Force a refresh against the exact URL *including* the query string, or disable cache in devtools.
+- **Mautic versions asset URLs from configuration, not from the file.** Its `?v<hash>` survives an edit, and the response carries no `Cache-Control`, so a CDN keeps the old file and a browser keeps its copy for hours on heuristic freshness. This plugin therefore registers its script and stylesheet with a hash of the file (`index.js?h=<md5 prefix>`, with Mautic's `v` appended after it), so every change is a new URL. Added after the 14/10/2026 deploy, when Cloudflare kept serving the previous panel. The trap still applies to anything else you load this way.
 - **`element.click()` produces false negatives on GrapesJS toolbars.** They respond to `mousedown`, and a synthetic click does not generate the full event sequence. Use a real click or dispatch `mousedown` explicitly.
 
 ## Known gaps
